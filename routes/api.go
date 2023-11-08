@@ -18,7 +18,9 @@ func RouteInit(app *fiber.App) {
 
 	// Parent Category
 	parentCategory := api.Group("/parent-category")
-	parentCategory.Get("/", handler.GetAllParentCategoryHandler)
-	parentCategory.Post("/store", handler.StoreParentCategoryHandler)
-
+	parentCategory.Get("/", handler.GetAllParentCategoryHandler).Name("parentCategory.index")
+	parentCategory.Post("/store", handler.StoreParentCategoryHandler).Name("parentCategory.store")
+	parentCategory.Get("/:parentSlug", handler.GetBySlugParentCategoryHandler).Name("parentCategory.show")
+	parentCategory.Put("/:parentSlug/update", handler.UpdateParentCategoryHandler).Name("parentCategory.update")
+	parentCategory.Delete("/:parentSlug", handler.DeleteParentCategoryHandler).Name("parentCategory.destroy")
 }
