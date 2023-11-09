@@ -21,7 +21,7 @@ func GetAllProductCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS GET ALL DATAS",
 		"data" : productCategories,
 	})
@@ -62,7 +62,7 @@ func StoreProductCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 	
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS CREATE DATA",
 		"data" : productCategory,
 	})
@@ -82,7 +82,7 @@ func GetBySlugProductCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 	
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS GET DATA",
 		"data" : productCategory,
 	})
@@ -127,7 +127,7 @@ func UpdateProductCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 	
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS UPDATE DATA WITH ID : " + strconv.Itoa(productCategory.ID),
 		"data" : productCategory,
 	})
@@ -157,7 +157,7 @@ func DeleteProductCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS DELETE DATA",
 	})
 }

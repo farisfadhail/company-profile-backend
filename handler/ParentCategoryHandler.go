@@ -27,7 +27,7 @@ func GetAllParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(parentCategories)
+	return ctx.Status(fiber.StatusOK).JSON(parentCategories)
 }
 
 func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
@@ -64,7 +64,7 @@ func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS CREATE PARENT CATEGORY",
 		"data" : parentCategory,
 	})
@@ -84,7 +84,7 @@ func GetBySlugParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS GET DATA",
 		"data" : parentCategory,
 	})
@@ -129,7 +129,7 @@ func UpdateParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS UPDATE DATA WITH ID : " + strconv.Itoa(parentCategory.ID),
 		"data" : parentCategory,
 	})
@@ -159,7 +159,7 @@ func DeleteParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS DELETED DATA",
 	})
 }
