@@ -15,7 +15,7 @@ type Product struct {
 	TokopediaLink     string         `gorm:"column:tokopedia_link"`
 	ShopeeLink        string         `gorm:"column:shopee_link"`
 	LazadaLink        string         `gorm:"column:lazada_link"`
-	ImageGalleries    []ImageGallery `json:"-" gorm:"foreignKey:product_id;references:id"`
+	ImageGalleries    []ImageGallery `json:"image_galleries" gorm:"foreignKey:product_id;references:id"`
 	CreatedAt         time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt         time.Time      `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`
 }
