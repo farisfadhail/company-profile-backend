@@ -20,7 +20,15 @@ func RouteInit(app *fiber.App) {
 	parentCategory := api.Group("/parent-category")
 	parentCategory.Get("/", handler.GetAllParentCategoryHandler).Name("parentCategory.index")
 	parentCategory.Post("/store", handler.StoreParentCategoryHandler).Name("parentCategory.store")
-	parentCategory.Get("/:parentSlug", handler.GetBySlugParentCategoryHandler).Name("parentCategory.show")
-	parentCategory.Put("/:parentSlug/update", handler.UpdateParentCategoryHandler).Name("parentCategory.update")
-	parentCategory.Delete("/:parentSlug", handler.DeleteParentCategoryHandler).Name("parentCategory.destroy")
+	parentCategory.Get("/:slug", handler.GetBySlugParentCategoryHandler).Name("parentCategory.show")
+	parentCategory.Put("/:slug/update", handler.UpdateParentCategoryHandler).Name("parentCategory.update")
+	parentCategory.Delete("/:slug", handler.DeleteParentCategoryHandler).Name("parentCategory.destroy")
+
+	// Product Category
+	productCategory := api.Group("/product-category")
+	productCategory.Get("/", handler.GetAllProductCategoryHandler).Name("productCategory.index")
+	productCategory.Post("/store", handler.StoreProductCategoryHandler).Name("productCategory.store")
+	productCategory.Get("/:slug", handler.GetBySlugProductCategoryHandler).Name("productCategory.show")
+	productCategory.Put("/:slug/update", handler.UpdateProductCategoryHandler).Name("productCategory.update")
+	productCategory.Delete("/:slug", handler.DeleteProductCategoryHandler).Name("productCategory.update")
 }
