@@ -15,13 +15,15 @@ var db = database.DatabaseInit()
 var validate = validator.New()
 
 func GetAllParentCategoryHandler(ctx *fiber.Ctx) error {
+
 	var parentCategories []entity.ParentCategory
 
-	err := db.Debug().Find(&parentCategories).Error
+	err := db.Debug().Preload("ProductCategories").Find(&parentCategories).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message" : "CANNOT GET DATAS",
+			"message" : "CANNOT GET ALL DATAS",
+			"error" : err.Error(),
 		})
 	}
 
@@ -29,8 +31,8 @@ func GetAllParentCategoryHandler(ctx *fiber.Ctx) error {
 }
 
 func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
-	parentCategory := new(request.ParentCategoryRequest)
-	err := ctx.BodyParser(parentCategory)
+	parentCategoryRequest := new(request.ParentCategoryRequest)
+	err := ctx.BodyParser(parentCategoryRequest)
 
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -39,7 +41,7 @@ func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 	
-	err = validate.Struct(parentCategory)
+	err = validate.Struct(parentCategoryRequest)
 	
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -48,27 +50,28 @@ func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	newParentCategory := entity.ParentCategory{
-		Name: parentCategory.Name,
-		Slug: slug.Make(parentCategory.Name),
+	parentCategory := entity.ParentCategory{
+		Name: parentCategoryRequest.Name,
+		Slug: slug.Make(parentCategoryRequest.Name),
 	}
 
-	err = db.Debug().Create(&newParentCategory).Error
+	err = db.Debug().Create(&parentCategory).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message" : "FAILED TO STORE DATA",
+			"error" : err.Error(),
 		})
 	}
 
 	return ctx.JSON(fiber.Map{
 		"message" : "SUCCESS CREATE PARENT CATEGORY",
-		"data" : newParentCategory,
+		"data" : parentCategory,
 	})
 }
 
 func GetBySlugParentCategoryHandler(ctx *fiber.Ctx) error {
-	parentSlug := ctx.Params("parentSlug")
+	parentSlug := ctx.Params("slug")
 
 	var parentCategory entity.ParentCategory
 
@@ -82,7 +85,7 @@ func GetBySlugParentCategoryHandler(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(fiber.Map{
-		"message" : "SUCCESS GET DATA BY SLUG",
+		"message" : "SUCCESS GET DATA",
 		"data" : parentCategory,
 	})
 }
@@ -94,11 +97,12 @@ func UpdateParentCategoryHandler(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message" : "BAD REQUEST",
+			"error" : err.Error(),
 		})
 	}
 
 	// FIND DATA
-	parentSlug := ctx.Params("parentSlug")
+	parentSlug := ctx.Params("slug")
 
 	var parentCategory entity.ParentCategory
 
@@ -107,6 +111,7 @@ func UpdateParentCategoryHandler(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
 		})
 	}
 
@@ -114,11 +119,13 @@ func UpdateParentCategoryHandler(ctx *fiber.Ctx) error {
 	if parentCategoryRequest.Name != "" {
 		parentCategoryRequest.Slug = slug.Make(parentCategoryRequest.Name)
 	}
+
 	err = db.Debug().Model(&parentCategory).Updates(parentCategoryRequest).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message" : "FAILED TO UPDATE DATA",
+			"error" : err.Error(),
 		})
 	}
 
@@ -130,7 +137,7 @@ func UpdateParentCategoryHandler(ctx *fiber.Ctx) error {
 
 func DeleteParentCategoryHandler(ctx *fiber.Ctx) error {
 	// FIND DATA
-	parentSlug := ctx.Params("parentSlug")
+	parentSlug := ctx.Params("slug")
 
 	var parentCategory entity.ParentCategory
 
@@ -139,14 +146,16 @@ func DeleteParentCategoryHandler(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
 			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
 		})
 	}
 
-	err = db.Debug().Delete(&parentCategory, "slug = ?", parentSlug).Error
+	err = db.Debug().Delete(&parentCategory).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message" : "FAILED TO DELETE DATA",
+			"error" : err.Error(),
 		})
 	}
 
