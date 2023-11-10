@@ -18,7 +18,7 @@ func GetAllParentCategoryHandler(ctx *fiber.Ctx) error {
 
 	var parentCategories []entity.ParentCategory
 
-	err := db.Debug().Preload("ProductCategories").Find(&parentCategories).Error
+	err := db.Debug().Find(&parentCategories).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -27,7 +27,10 @@ func GetAllParentCategoryHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(parentCategories)
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS GET ALL DATAS",
+		"data" : parentCategories,
+	})
 }
 
 func StoreParentCategoryHandler(ctx *fiber.Ctx) error {
@@ -75,7 +78,7 @@ func GetBySlugParentCategoryHandler(ctx *fiber.Ctx) error {
 
 	var parentCategory entity.ParentCategory
 
-	err := db.Debug().Take(&parentCategory, "slug = ?", parentSlug).Error
+	err := db.Debug().Preload("ProductCategories").Take(&parentCategory, "slug = ?", parentSlug).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
