@@ -3,6 +3,7 @@ package routes
 import (
 	"plastindo-back-end/config"
 	"plastindo-back-end/handler"
+	"plastindo-back-end/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,8 +36,16 @@ func RouteInit(app *fiber.App) {
 	// Product
 	product := api.Group("/product")
 	product.Get("/", handler.GetAllProductHandler).Name("product.index")
-	product.Post("/store", handler.StoreProductHandler).Name("product.store")
+	product.Post("/store", utils.HandleMultipleFile, handler.StoreProductHandler).Name("product.store")
 	product.Get("/:slug", handler.GetBySlugProductHandler).Name("product.show")
-	product.Put("/:slug/update", handler.UpdateProductHandler).Name("product.update")
+	product.Put("/:slug/update", utils.HandleMultipleFile, handler.UpdateProductHandler).Name("product.update")
 	product.Delete("/:slug", handler.DeleteProductHandler).Name("product.destroy")
+
+	// User
+	api.Post("/sign-up", handler.SignUpHandler).Name("sign-up")
+	api.Post("/sign-in", handler.SignInHandler).Name("sign-in")
+	api.Get("/user/", handler.GetAllUserHandler).Name("user.index")
+	api.Get("/user/:id", handler.GetByIdUserHandler).Name("user.show")
+	api.Put("/user/:id", handler.UpdateUserHandler).Name("user.update")
+	api.Delete("/user/:id", handler.DeleteUserHandler).Name("user.destroy")
 }
