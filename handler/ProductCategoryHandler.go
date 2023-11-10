@@ -73,7 +73,7 @@ func GetBySlugProductCategoryHandler(ctx *fiber.Ctx) error {
 
 	var productCategory entity.ProductCategory
 
-	err := db.Debug().Take(&productCategory, "slug = ?", productCategorySlug).Error
+	err := db.Debug().Preload("Products").Take(&productCategory, "slug = ?", productCategorySlug).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
