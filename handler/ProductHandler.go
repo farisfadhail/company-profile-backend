@@ -1,0 +1,184 @@
+package handler
+
+import (
+	"plastindo-back-end/models/entity"
+	"plastindo-back-end/models/request"
+	"strconv"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gosimple/slug"
+)
+
+func GetAllProductHandler(ctx *fiber.Ctx) error {
+	var products []entity.Product
+
+	err := db.Debug().Find(&products).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message" : "FAILED TO GET ALL DATAS",
+			"error" : err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS GET ALL DATAS",
+		"data" : products,
+	})
+}
+
+func StoreProductHandler(ctx *fiber.Ctx) error {
+	productRequest := new(request.ProductRequest)
+	err := ctx.BodyParser(productRequest)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message" : "BAD REQUEST",
+			"error" : err.Error(),
+		})
+	}
+	
+	err = validate.Struct(productRequest)
+	
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message" : "BAD REQUEST",
+			"error" : err.Error(),
+		})
+	}
+
+	product := entity.Product{
+		ProductCategoryId: productRequest.ProductCategoryId,
+		Title: productRequest.Title,
+		Slug: slug.Make(productRequest.Title),
+		Material: productRequest.Material,
+		Type: productRequest.Type,
+		Static: productRequest.Static,
+		Dynamic: productRequest.Dynamic,
+		Racking: productRequest.Racking,
+		TokopediaLink: productRequest.TokopediaLink,
+		ShopeeLink: productRequest.ShopeeLink,
+		LazadaLink: productRequest.LazadaLink,
+	}
+
+	err = db.Debug().Create(&product).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message" : "FAILED TO CREATE DATA",
+			"error" : err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS CREATE DATA",
+		"data" : product,
+	})
+}
+
+func GetBySlugProductHandler(ctx *fiber.Ctx) error {
+	productSlug := ctx.Params("slug")
+
+	var product entity.Product
+
+	err := db.Debug().Take(&product, "slug = ?", productSlug).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
+		})
+	}
+	
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS GET DATA",
+		"data" : product,
+	})
+}
+
+func UpdateProductHandler(ctx *fiber.Ctx) error {
+	productRequest := new(request.ProductRequest)
+	err := ctx.BodyParser(productRequest)
+
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message" : "BAD REQUEST",
+			"error" : err.Error(),
+		})
+	}
+
+	// FIND DATA
+	productSlug := ctx.Params("slug")
+
+	var product entity.Product
+
+	err = db.Debug().Take(&product, "slug = ?", productSlug).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
+		})
+	}
+
+	// UPDATE DATA
+	if productRequest.Title != "" {
+		product.Title = productRequest.Title
+		product.Slug = slug.Make(productRequest.Title)
+	}
+
+	if productRequest.ProductCategoryId != 0 {
+        product.ProductCategoryId = productRequest.ProductCategoryId
+    }
+
+	product.Material = productRequest.Material
+	product.Type = productRequest.Type
+	product.Static = productRequest.Static
+	product.Dynamic = productRequest.Dynamic
+	product.Racking = productRequest.Racking
+	product.TokopediaLink = productRequest.TokopediaLink
+	product.ShopeeLink = productRequest.ShopeeLink
+	product.LazadaLink = productRequest.LazadaLink
+
+	err = db.Debug().Save(&product).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message" : "FAILED TO UPDATE DATA",
+			"error" : err.Error(),
+		})
+	}
+	
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS UPDATE DATA WITH ID : " + strconv.Itoa(product.ID),
+		"data" : product,
+	})
+}
+
+func DeleteProductHandler(ctx *fiber.Ctx) error {
+	productSlug := ctx.Params("slug")
+
+	var product entity.Product
+
+	err := db.Debug().Take(&product, "slug = ?", productSlug).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
+		})
+	}
+
+	err = db.Debug().Delete(&product).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message" : "FAILED TO DELETE DATA",
+			"error" : err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message" : "SUCCESS DELETE DATA",
+	})
+}

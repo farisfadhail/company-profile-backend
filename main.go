@@ -17,7 +17,7 @@ func main() {
 
 	routes.RouteInit(app)
 
-	err := app.Listen(":3000")
+	err := app.Listen("localhost:3000")
 	if err != nil {
 		log.Println("Failed to listen go fiber server")
 		os.Exit(1)
