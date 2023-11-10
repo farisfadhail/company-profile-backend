@@ -149,6 +149,34 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// UPDATE DATA
+	if productRequest.Title != "" {
+		product.Title = productRequest.Title
+		product.Slug = slug.Make(productRequest.Title)
+	}
+
+	if productRequest.ProductCategoryId != 0 {
+        product.ProductCategoryId = productRequest.ProductCategoryId
+    }
+
+	product.Material = productRequest.Material
+	product.Type = productRequest.Type
+	product.Static = productRequest.Static
+	product.Dynamic = productRequest.Dynamic
+	product.Racking = productRequest.Racking
+	product.TokopediaLink = productRequest.TokopediaLink
+	product.ShopeeLink = productRequest.ShopeeLink
+	product.LazadaLink = productRequest.LazadaLink
+
+	err = db.Debug().Save(&product).Error
+
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message" : "FAILED TO UPDATE DATA",
+			"error" : err.Error(),
+		})
+	}
+
 	// DELETE IMAGE
 	var imageGalleries []entity.ImageGallery
 
@@ -183,7 +211,7 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 			"message" : "IMAGE PRODUCT IS REQUIRED!",
 		})
-	}
+	} 
 
 	for _, filename := range filenames {
 		imageGallery := entity.ImageGallery{
@@ -191,7 +219,7 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 			Name: filename,
 		}
 
-		err = db.Debug().Create(&imageGallery).Error
+		err = db.Debug().Updates(&imageGallery).Error
 
 		if err != nil {
 			log.Println("SOME DATA FAILED TO CREATE")
@@ -200,34 +228,6 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 				"error" : err.Error(),
 			})
 		}
-	}
-
-	// UPDATE DATA
-	if productRequest.Title != "" {
-		product.Title = productRequest.Title
-		product.Slug = slug.Make(productRequest.Title)
-	}
-
-	if productRequest.ProductCategoryId != 0 {
-        product.ProductCategoryId = productRequest.ProductCategoryId
-    }
-
-	product.Material = productRequest.Material
-	product.Type = productRequest.Type
-	product.Static = productRequest.Static
-	product.Dynamic = productRequest.Dynamic
-	product.Racking = productRequest.Racking
-	product.TokopediaLink = productRequest.TokopediaLink
-	product.ShopeeLink = productRequest.ShopeeLink
-	product.LazadaLink = productRequest.LazadaLink
-
-	err = db.Debug().Save(&product).Error
-
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message" : "FAILED TO UPDATE DATA",
-			"error" : err.Error(),
-		})
 	}
 	
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
