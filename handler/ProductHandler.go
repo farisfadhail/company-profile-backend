@@ -109,7 +109,7 @@ func GetBySlugProductHandler(ctx *fiber.Ctx) error {
 
 	var product entity.Product
 
-	err := db.Debug().Take(&product, "slug = ?", productSlug).Error
+	err := db.Debug().Preload("ImageGalleries").Take(&product, "slug = ?", productSlug).Error
 
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -219,7 +219,7 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 			Name: filename,
 		}
 
-		err = db.Debug().Updates(&imageGallery).Error
+		err = db.Debug().Create(&imageGallery).Error
 
 		if err != nil {
 			log.Println("SOME DATA FAILED TO CREATE")
