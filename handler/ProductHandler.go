@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"log"
 	"plastindo-back-end/models/entity"
 	"plastindo-back-end/models/request"
+	"plastindo-back-end/utils"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -70,6 +72,32 @@ func StoreProductHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// CREATE FILE
+	filenames := ctx.Locals("filenames").([]string)
+	if len(filenames) == 0 {
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message" : "IMAGE PRODUCT IS REQUIRED!",
+		})
+	}
+
+	for _, filename := range filenames {
+		imageGallery := entity.ImageGallery{
+			ProductId: product.ID,
+			// Name: strconv.Itoa(product.ID) + filename,
+			Name: filename,
+		}
+
+		err = db.Debug().Create(&imageGallery).Error
+
+		if err != nil {
+			log.Println("SOME DATA FAILED TO CREATE")
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message" : "FAILED TO STORE DATA",
+				"error" : err.Error(),
+			})
+		}
+	}
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message" : "SUCCESS CREATE DATA",
 		"data" : product,
@@ -121,6 +149,59 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// DELETE IMAGE
+	var imageGalleries []entity.ImageGallery
+
+	err = db.Debug().Find(&imageGalleries, "product_id = ?", product.ID).Error
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
+		})
+	}
+
+	for _, imageGallery := range imageGalleries {
+		// DELETE IMAGE FROM DIRECTORY
+		err = utils.HandleRemoveFile(imageGallery.Name)
+		if err != nil {
+			log.Println("FAILED TO DELETE DATA IN DIRECTORY")
+		}
+
+		// DELETE IMAGE FROM DATABASE
+		err = db.Debug().Delete(&imageGallery).Error
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message" : "FAILED TO DELETE DATA IMAGE",
+				"error" : err.Error(),
+			})
+		}
+	}
+
+	// CREATE FILE
+	filenames := ctx.Locals("filenames").([]string)
+	if len(filenames) == 0 {
+		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"message" : "IMAGE PRODUCT IS REQUIRED!",
+		})
+	}
+
+	for _, filename := range filenames {
+		imageGallery := entity.ImageGallery{
+			ProductId: product.ID,
+			Name: filename,
+		}
+
+		err = db.Debug().Updates(&imageGallery).Error
+
+		if err != nil {
+			log.Println("SOME DATA FAILED TO CREATE")
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message" : "FAILED TO STORE DATA",
+				"error" : err.Error(),
+			})
+		}
+	}
+
 	// UPDATE DATA
 	if productRequest.Title != "" {
 		product.Title = productRequest.Title
@@ -167,6 +248,34 @@ func DeleteProductHandler(ctx *fiber.Ctx) error {
 			"message" : "DATA NOT FOUND",
 			"error" : err.Error(),
 		})
+	}
+
+	// DELETE IMAGE
+	var imageGalleries []entity.ImageGallery
+
+	err = db.Debug().Find(&imageGalleries, "product_id = ?", product.ID).Error
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message" : "DATA NOT FOUND",
+			"error" : err.Error(),
+		})
+	}
+
+	for _, imageGallery := range imageGalleries {
+		// DELETE IMAGE FROM DIRECTORY
+		err = utils.HandleRemoveFile(imageGallery.Name)
+		if err != nil {
+			log.Println("FAILED TO DELETE DATA IN DIRECTORY")
+		}
+
+		// DELETE IMAGE FROM DATABASE
+		err = db.Debug().Delete(&imageGallery).Error
+		if err != nil {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message" : "FAILED TO DELETE DATA IMAGE",
+				"error" : err.Error(),
+			})
+		}
 	}
 
 	err = db.Debug().Delete(&product).Error
