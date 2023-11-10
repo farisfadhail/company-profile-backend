@@ -191,7 +191,7 @@ func UpdateProductHandler(ctx *fiber.Ctx) error {
 			Name: filename,
 		}
 
-		err = db.Debug().Updates(&imageGallery).Error
+		err = db.Debug().Create(&imageGallery).Error
 
 		if err != nil {
 			log.Println("SOME DATA FAILED TO CREATE")
