@@ -32,6 +32,7 @@ func RouteInit(app *fiber.App) {
 	productCategory.Put("/:slug/update", handler.UpdateProductCategoryHandler).Name("productCategory.update")
 	productCategory.Delete("/:slug", handler.DeleteProductCategoryHandler).Name("productCategory.destroy")
 
+	// Product
 	product := api.Group("/product")
 	product.Get("/", handler.GetAllProductHandler).Name("product.index")
 	product.Post("/store", handler.StoreProductHandler).Name("product.store")
